@@ -50,6 +50,37 @@ const client = new GraphQLClient(endpoint, { headers: {} })
 client.request(query, variables).then(data => console.log(data))
 ```
 
+### Receiving a raw response
+
+```ts
+import { rawRequest } from '@pkasila/graphql-request-fetch'
+
+async function main() {
+  const endpoint = 'https://api.graph.cool/simple/v1/cixos23120m0n0173veiiwrjr'
+
+  const query = `
+    {
+      Movie(title: "Inception") {
+        releaseDate
+        actors {
+          name
+        }
+      }
+    }
+  `
+
+  const { data, errors, extensions, headers, status } = await rawRequest(
+    endpoint,
+    query
+  )
+  console.log(
+    JSON.stringify({ data, errors, extensions, headers, status }, undefined, 2)
+  )
+}
+
+main().catch(error => console.error(error))
+```
+
 ### Use Cloudflare Cache API
 
 ```ts
