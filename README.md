@@ -37,84 +37,57 @@ request('https://api.graph.cool/simple/v1/movies', query).then(data =>
 )
 ```
 
-### Static function and GraphQLClient
+## API
 
-```ts
-import { request, GraphQLClient } from '@pkasila/graphql-request-fetch'
+### `GraphQLClient`
 
-// Run GraphQL queries/mutations using a static function:
-request(endpoint, query, variables).then(data => console.log(data))
+#### `constructor(url: string, options?: Options)`
 
-// Also, you can create GraphQLClient on your own and specify headers:
-const client = new GraphQLClient(endpoint, { headers: {} })
-client.request(query, variables).then(data => console.log(data))
-```
+Constructs a new `GraphQLClient`
 
-### Receiving a raw response
+* `url` - a GraphQL endpoint
+* `options` - options to query the GraphQL endpoint
 
-```ts
-import { rawRequest } from '@pkasila/graphql-request-fetch'
+#### `rawRequest(query: string, variables?: Variables, options: RequestOptions)`
 
-async function main() {
-  const endpoint = 'https://api.graph.cool/simple/v1/cixos23120m0n0173veiiwrjr'
+Allows you to send a request and get a raw response.
 
-  const query = `
-    {
-      Movie(title: "Inception") {
-        releaseDate
-        actors {
-          name
-        }
-      }
-    }
-  `
+* `query` - a query to be sent to the GraphQL endpoint
+* `variables` - a dictionary of variables to be used with the query
+* `options` - caching options
 
-  const { data, errors, extensions, headers, status } = await rawRequest(
-    endpoint,
-    query
-  )
-  console.log(
-    JSON.stringify({ data, errors, extensions, headers, status }, undefined, 2)
-  )
-}
+#### `request(query: string, variables?: Variables, options: RequestOptions)`
 
-main().catch(error => console.error(error))
-```
+Wraps `rawRequest` and returns `data` from the query response.
 
-### Use Cloudflare Cache API
+* `query` - a query to be sent to the GraphQL endpoint
+* `variables` - a dictionary of variables to be used with the query
+* `options` - caching options
 
-```ts
-import { request } from '@pkasila/graphql-request-fetch'
+### Types
 
-async function main() {
-  const endpoint = 'https://api.graph.cool/simple/v1/cixos23120m0n0173veiiwrjr'
+#### `Options`
 
-  const query = `
-    {
-      Movie(title: "Inception") {
-        releaseDate
-        actors {
-          fullname # "Cannot query field 'fullname' on type 'Actor'. Did you mean 'name'?"
-        }
-      }
-    }
-  `
+Refer to `RequestInit`'s documentation.
 
-  try {
-    const data = await request(endpoint, query, {
-      cache: true, 
-      cacheKey: 'https://cache.yourdomain.com/something', 
-      cacheTtl: 300
-    });
-    console.log(JSON.stringify(data, undefined, 2))
-  } catch (error) {
-    console.error(JSON.stringify(error, undefined, 2))
-    process.exit(1)
-  }
-}
+#### `RequestOptions`
 
-main().catch(error => console.error(error))
-```
+Specifies caching options for the response.
+
+* `cache` - is caching?
+* `cacheKey` (required if caching) - key for the Cache API
+* `cacheTtl` (required if caching) - TTL for the Cache API
+* `cacheType` (defaults to `public`) - cache-control: `public` or `private`
+* `cacheOverride` (defaults to `false`) - whether overrides server's `Cache-Control` header
+
+### Static functions (`request`, `rawRequest`)
+
+Sometimes you just want to make GraphQL requests without any need in a custom `GraphQLClient`.
+`@pkasila/graphql-request-fetch` lets you use it that way using static functions. They will
+create `GraphQLClient` on their own.
+
+To call them, you just need to specify your GraphQL endpoint first and then follow the same
+call as from `GraphQLClient.request` and `GraphQLClient.rawRequest`.
 
 [build-img]:https://github.com/pkasila/graphql-request-fetch/actions/workflows/release.yml/badge.svg
 [build-url]:https://github.com/pkasila/graphql-request-fetch/actions/workflows/release.yml

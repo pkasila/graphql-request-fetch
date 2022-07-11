@@ -16,6 +16,14 @@ export interface Options {
   integrity?: RequestInit['integrity'];
 }
 
+export interface RequestOptions {
+  cache: boolean;
+  cacheKey?: string;
+  cacheTtl?: number;
+  cacheType?: 'public' | 'private';
+  cacheOverride?: boolean;
+}
+
 export interface GraphQLError {
   message: string;
   locations: { line: number; column: number }[];
