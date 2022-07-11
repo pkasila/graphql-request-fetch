@@ -3,6 +3,7 @@ import type {
   GraphQLResponse,
   Headers as HttpHeaders,
   Options,
+  RequestOptions,
   Variables,
 } from './types';
 import { ClientError } from './types';
@@ -21,11 +22,7 @@ export class GraphQLClient {
   async rawRequest<T extends any>(
     query: string,
     variables?: Variables,
-    options: {
-      cache: boolean;
-      cacheKey?: string;
-      cacheTtl?: number;
-    } = {
+    options: RequestOptions = {
       cache: false,
     }
   ): Promise<{
@@ -74,10 +71,17 @@ export class GraphQLClient {
           ...others,
         });
         response = new Response(response.body, response);
-        response.headers.append(
-          'Cache-Control',
-          `max-age=${options.cacheTtl ?? 0}`
-        );
+        if (response.headers.has('Cache-Control') && options.cacheOverride) {
+          response.headers.set(
+            'Cache-Control',
+            `${options.cacheType ?? 'public'}, max-age=${options.cacheTtl ?? 0}`
+          );
+        } else {
+          response.headers.append(
+            'Cache-Control',
+            `${options.cacheType ?? 'public'}, max-age=${options.cacheTtl ?? 0}`
+          );
+        }
         await cache.put(options.cacheKey, response.clone());
       }
     } else {
@@ -112,11 +116,7 @@ export class GraphQLClient {
   async request<T extends any>(
     query: string,
     variables?: Variables,
-    options: {
-      cache: boolean;
-      cacheKey?: string;
-      cacheTtl?: number;
-    } = {
+    options: RequestOptions = {
       cache: false,
     }
   ): Promise<T> {
